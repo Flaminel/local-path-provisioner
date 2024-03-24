@@ -366,7 +366,7 @@ func (p *LocalPathProvisioner) provisionFor(opts pvController.ProvisionOptions, 
 	}
 
 	name := opts.PVName
-	path := basePath
+	path := filepath.Join(basePath, opts.PVC.Namespace, "-")
 	if nodeName == "" {
 		logrus.Infof("Creating volume %v at %v", name, path)
 	} else {
