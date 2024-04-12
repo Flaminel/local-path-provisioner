@@ -22,6 +22,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	clientset "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"k8s.io/apimachinery/pkg/util/uuid"
 
 	pvController "sigs.k8s.io/sig-storage-lib-external-provisioner/v8/controller"
 )
@@ -366,7 +367,21 @@ func (p *LocalPathProvisioner) provisionFor(opts pvController.ProvisionOptions, 
 	}
 
 	name := opts.PVName
-	path := filepath.Join(basePath, opts.PVC.Namespace, "-")
+
+	path := basePath
+
+	if useNamespace, ok := pvc.ObjectMeta.Labels["namespace-as-directory"]; ok {
+		if useNamespace == "true" {
+			path = filepath.Join(path, opts.PVC.Namespace, "-")
+		}
+	}
+
+	if useRandom, ok := pvc.ObjectMeta.Labels["random-directory"]; ok {
+		if useRandom == "true" {
+			path = filepath.Join(path, string(uuid.NewUUID()), "-")
+		}
+	}
+	
 	if nodeName == "" {
 		logrus.Infof("Creating volume %v at %v", name, path)
 	} else {
