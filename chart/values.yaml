@@ -37,7 +37,7 @@ configMaps:
                 },
                 {
                         "node":"jarvis",
-                        "paths":["/mnt/shared/cluster", "/dev/dri"]
+                        "paths":["/mnt/shared/cluster", "/dev/dri", "/run/dbus"]
                 }
                 ]
         }
@@ -138,3 +138,17 @@ storageClasses:
     provisioner: rancher.io/local-path
     volumeBindingMode: WaitForFirstConsumer
     reclaimPolicy: Delete
+  - name: local-path-dbus
+    labels:
+      namespace-as-directory: "false"
+      random-directory: "false"
+    provisioner: rancher.io/local-path
+    volumeBindingMode: WaitForFirstConsumer
+    reclaimPolicy: Delete
+    parameters:
+      nodePath: /run/dbus
+    allowedTopologies:
+      - matchLabelExpressions:
+        - key: kubernetes.io/hostname
+          values:
+            - jarvis
